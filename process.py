@@ -76,6 +76,57 @@ def convert_raw_to_wavs():
     shutil.rmtree(RAW_DATA_DIR_PATH)
 
 
+chord_name_map = [
+    'A',
+    'B',
+    'C',
+    'D',
+    'E',
+    'F',
+    'G'
+]
+
+quality_map = [
+    'clear',
+    'ringy',
+    'muted'
+]
+
+
+def one_hot_encode(Y) -> np.array:
+    """
+    First index MUST be chord name.
+    Second index MUST be quality.
+
+    Returns a flattened NumPy array.
+    """
+
+    new_Y = []
+    for y in Y:
+        assert len(y) == 2, 'Y MUST have a dimensionality of 2.'
+        inner_Y = []
+
+        # Chord names
+        for chord in chord_name_map:
+            if y[0].lower() == chord.lower():
+                inner_Y.append(1)
+            else:
+                inner_Y.append(0)
+
+        # Qualities
+        for quality in quality_map:
+            if y[1].lower() == quality.lower():
+                inner_Y.append(1)
+            else:
+                inner_Y.append(0)
+
+        assert sum(inner_Y) == 2, \
+            'Each output MUST Have 1 selection for each category.'
+        new_Y.append(inner_Y)
+
+    return np.array(new_Y)
+
+
 class DataContainer:
     def __init__(self):
         self.data = []
@@ -92,12 +143,8 @@ class DataContainer:
         ])
 
     def get_data(self):
-        """
-        TODO: Encode qualities & chord names etc.
-        """
-
         data = np.array(self.data)
-        return data[:, 0], data[:, 1]
+        return data[:, 0], one_hot_encode(data[:, 1])
 
 
 def get_data():
