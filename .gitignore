@@ -1,3 +1,6 @@
 .DS_Store
-/.vscode
-/chord_data
+.vscode
+chord_data
+raw_data
+tempCodeRunnerFile.py
+__pycache__
