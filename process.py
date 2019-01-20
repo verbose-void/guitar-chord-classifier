@@ -1,4 +1,3 @@
-import tensorflow as tf
 import numpy as np
 import librosa.feature as lf
 from pydub import AudioSegment
@@ -7,6 +6,7 @@ import shutil
 
 DATA_DIR_PATH = 'chord_data'
 RAW_DATA_DIR_PATH = 'raw_data'
+AUDIO_LENGTH = 2 * 1000
 
 
 def for_each_chord_file(function, parent_path=DATA_DIR_PATH):
@@ -134,6 +134,13 @@ class DataContainer:
     def append_data(self, chord_name, quality, path):
         input_format = path.split('.')[-1]
         sound = AudioSegment.from_file(path, format=input_format)
+
+        assert len(sound) >= AUDIO_LENGTH, \
+            'Input sample %s MUST be at least %i miliseconds.' % \
+            (path, AUDIO_LENGTH)
+
+        # truncate to be AUDIO_LENGTH miliseconds long
+        sound = sound[:AUDIO_LENGTH]
         sound = np.array(sound.get_array_of_samples(), dtype='float32')
         mfcc = lf.mfcc(sound)
 
@@ -144,7 +151,10 @@ class DataContainer:
 
     def get_data(self):
         data = np.array(self.data)
-        return np.array(data[:, 0]), one_hot_encode(data[:, 1])
+        X = np.stack(data[:, 0])
+        Y = one_hot_encode(data[:, 1])
+        assert len(X) == len(Y), 'EVERY input MUST have a resulting output.'
+        return X, Y
 
 
 def get_data():
