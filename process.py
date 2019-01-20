@@ -60,6 +60,8 @@ def convert_to_wav_and_move(chord_name, quality, path):
         os.makedirs(dir_name)
 
     sound = AudioSegment.from_file(path, format=input_format)
+    # truncate to be AUDIO_LENGTH miliseconds long
+    sound = sound[:AUDIO_LENGTH]
     sound.export(export_path, format='wav')
 
 
@@ -68,12 +70,17 @@ def convert_raw_to_wavs():
     Takes all files from 'RAW_DATA_DIR_PATH' and moves them to 'DATA_DIR_PATH', also
     converting them to the proper file type.
     """
+    print('Converting raw files to real data...')
 
     if not os.path.isdir(RAW_DATA_DIR_PATH):
         return print('No data to process, skipping...')
 
     for_each_chord_file(convert_to_wav_and_move, parent_path=RAW_DATA_DIR_PATH)
-    shutil.rmtree(RAW_DATA_DIR_PATH)
+    print('Conversion complete!')
+
+    delete = input('Would you like to delete all raw data? (y, N): ')
+    if delete.lower() == 'y':
+        shutil.rmtree(RAW_DATA_DIR_PATH)
 
 
 chord_name_map = [
@@ -135,12 +142,10 @@ class DataContainer:
         input_format = path.split('.')[-1]
         sound = AudioSegment.from_file(path, format=input_format)
 
-        assert len(sound) >= AUDIO_LENGTH, \
-            'Input sample %s MUST be at least %i miliseconds.' % \
+        assert len(sound) == AUDIO_LENGTH, \
+            'Input sample %s MUST be %i miliseconds long.' % \
             (path, AUDIO_LENGTH)
 
-        # truncate to be AUDIO_LENGTH miliseconds long
-        sound = sound[:AUDIO_LENGTH]
         sound = np.array(sound.get_array_of_samples(), dtype='float32')
         mfcc = lf.mfcc(sound)
 
