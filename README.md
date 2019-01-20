@@ -6,6 +6,7 @@ A machine learning model that classifies what guitar chord is being played and t
 
 ### Libraries Required:
 - [TensorFlow](https://www.tensorflow.org/)
+- [NumPy](http://www.numpy.org/)
 - [PyDub](https://github.com/jiaaro/pydub)
 - [FFmpeg](https://github.com/jiaaro/pydub#getting-ffmpeg-set-up) (PyDub Dependency)
 
