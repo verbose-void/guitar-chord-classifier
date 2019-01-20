@@ -144,7 +144,7 @@ class DataContainer:
 
     def get_data(self):
         data = np.array(self.data)
-        return data[:, 0], one_hot_encode(data[:, 1])
+        return np.array(data[:, 0]), one_hot_encode(data[:, 1])
 
 
 def get_data():
