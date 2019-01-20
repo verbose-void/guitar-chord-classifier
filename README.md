@@ -27,4 +27,4 @@ A machine learning model that classifies what guitar chord is being played and t
 
 #### *Note:* All audio file types are accepted for raw data, as they will be converted into `.wav` files.
 
-***LIMIT YOUR FILE SIZES TO ~10 SECONDS***
+***FILE SIZES MUST BE A MINIMUM OF 2 SECONDS. ALL INPUT DATA WILL BE TRUNCATED FROM THE BEGINNING TO 2 SECONDS***
