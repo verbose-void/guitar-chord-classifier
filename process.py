@@ -70,10 +70,16 @@ def convert_raw_to_wavs():
     Takes all files from 'RAW_DATA_DIR_PATH' and moves them to 'DATA_DIR_PATH', also
     converting them to the proper file type.
     """
-    print('Converting raw files to real data...')
-
     if not os.path.isdir(RAW_DATA_DIR_PATH):
         return print('No data to process, skipping...')
+
+    convert = input(
+        'Would you like to convert the data inside raw_data? (y, N): ')
+
+    if convert.lower() == 'n':
+        return print('Skipping...')
+
+    print('Converting raw files to real data...')
 
     for_each_chord_file(convert_to_wav_and_move, parent_path=RAW_DATA_DIR_PATH)
     print('Conversion complete!')
