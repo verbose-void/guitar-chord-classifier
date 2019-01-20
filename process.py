@@ -1,4 +1,6 @@
 import tensorflow as tf
+import numpy as np
+import librosa.feature as lf
 from pydub import AudioSegment
 import os
 import shutil
@@ -67,14 +69,47 @@ def convert_raw_to_wavs():
     converting them to the proper file type.
     """
 
+    if not os.path.isdir(RAW_DATA_DIR_PATH):
+        return print('No data to process, skipping...')
+
     for_each_chord_file(convert_to_wav_and_move, parent_path=RAW_DATA_DIR_PATH)
     shutil.rmtree(RAW_DATA_DIR_PATH)
 
 
+class DataContainer:
+    def __init__(self):
+        self.data = []
+
+    def append_data(self, chord_name, quality, path):
+        input_format = path.split('.')[-1]
+        sound = AudioSegment.from_file(path, format=input_format)
+        sound = np.array(sound.get_array_of_samples(), dtype='float32')
+        mfcc = lf.mfcc(sound)
+
+        self.data.append([
+            mfcc,  # X
+            (chord_name, quality)  # Y
+        ])
+
+    def get_data(self):
+        """
+        TODO: Encode qualities & chord names etc.
+        """
+
+        data = np.array(self.data)
+        return data[:, 0], data[:, 1]
+
+
 def get_data():
-    for_each_chord_file(print)
+    dc = DataContainer()
+    for_each_chord_file(dc.append_data)
+    return dc.get_data()
 
 
 if __name__ == '__main__':
     convert_raw_to_wavs()
-    get_data()
+    X, Y = get_data()
+    print('\n\nInputs:\n')
+    print(X)
+    print('\n\nOutputs:\n')
+    print(Y)
