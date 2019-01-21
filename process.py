@@ -168,6 +168,8 @@ class DataContainer:
     def get_data(self):
         data = np.array(self.data)
         X = np.stack(data[:, 0])
+        # Normalize Xs
+        X = X / X.sum(keepdims=1)
         Y = one_hot_encode(data[:, 1])
         assert len(X) == len(Y), 'EVERY input MUST have a resulting output.'
         return X, Y
