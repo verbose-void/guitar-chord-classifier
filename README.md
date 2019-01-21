@@ -12,7 +12,8 @@ A machine learning model that classifies what guitar chord is being played and t
 
 ### Usage:
 - Clone this repository. `git clone https://github.com/McCrearyD/Guitar_Chord_Classifier`
-- To process any raw data for training, run `python3 -u process.py` inside the main directory.
+- To ONLY process raw data for training, run `python3 -u process.py` inside the main directory.
+- To train the model using your CPU or a single GPU, run `python3 -u train.py` inside the main directory.
 - More instructions will follow as more features come out! Currently under development!
 
 ### Adding Custom Data:
