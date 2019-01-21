@@ -1,12 +1,15 @@
 import numpy as np
+import tensorflow as tf
 import librosa.feature as lf
 from pydub import AudioSegment
 import os
+import math
 import shutil
 
 DATA_DIR_PATH = 'chord_data'
 RAW_DATA_DIR_PATH = 'raw_data'
 AUDIO_LENGTH = 2 * 1000
+TRAIN_TO_TEST_RATIO = 0.8
 
 
 def for_each_chord_file(function, parent_path=DATA_DIR_PATH):
@@ -154,6 +157,8 @@ class DataContainer:
 
         sound = np.array(sound.get_array_of_samples(), dtype='float32')
         mfcc = lf.mfcc(sound)
+        # compensate for audio being a single channel
+        mfcc = np.expand_dims(mfcc, axis=2)
 
         self.data.append([
             mfcc,  # X
@@ -172,6 +177,35 @@ def get_data():
     dc = DataContainer()
     for_each_chord_file(dc.append_data)
     return dc.get_data()
+
+
+def get_train_and_test_data():
+    """
+    Breaks up the data into training & test sets.
+
+    Returns:
+        train_X: training inputs
+        train_T: training labels
+        test_X: testing inputs
+        test_T: testing labels
+    """
+
+    X, T = get_data()
+
+    N, D, D2, CHANNELS = X.shape
+    train_D = math.floor(N * TRAIN_TO_TEST_RATIO)
+
+    # split into test/train sets
+    train_X = tf.cast(X[:train_D, :, :], tf.float32)
+    train_T = tf.cast(T[:train_D, :], tf.float32)
+    test_X = tf.cast(X[train_D-D:, :, :], tf.float32)
+    test_T = tf.cast(T[train_D-D:, :], tf.float32)
+
+    # make sure all dimensionalities are equal.
+    assert train_X.get_shape()[1:] == test_X.get_shape()[1:]
+    assert train_T.get_shape()[1:] == test_T.get_shape()[1:]
+
+    return train_X, train_T, test_X, test_T
 
 
 if __name__ == '__main__':
