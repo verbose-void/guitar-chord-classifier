@@ -5,15 +5,13 @@ A machine learning model that classifies what guitar chord is being played and t
 - Built in [python3](https://www.python.org/downloads/).
 
 ### Libraries Required:
-- [TensorFlow](https://www.tensorflow.org/)
 - [NumPy](http://www.numpy.org/)
 - [PyDub](https://github.com/jiaaro/pydub)
 - [FFmpeg](https://github.com/jiaaro/pydub#getting-ffmpeg-set-up) (PyDub Dependency)
 
 ### Usage:
 - Clone this repository. `git clone https://github.com/McCrearyD/Guitar_Chord_Classifier`
-- To ONLY process raw data for training, run `python3 -u process.py` inside the main directory.
-- To train the model using your CPU or a single GPU, run `python3 -u train.py` inside the main directory.
+- To ONLY process raw audio into spectrograms for training, run `python3 -u convert_data.py` inside the main directory.
 - More instructions will follow as more features come out! Currently under development!
 
 ### Adding Custom Data:
@@ -26,6 +24,6 @@ A machine learning model that classifies what guitar chord is being played and t
 - INSIDE the `ringy` sub-directory, append all files that are "ringy Gs".
 - Repeat this process for any chords, qualities, etc. you wish to train on.
 
-#### *Note:* All audio file types are accepted for raw data, as they will be converted into `.wav` files.
+#### *Note:* All audio file types are accepted for raw data, as they will be converted into spectrogram images. Also all multi-channel audio files will be converted to 1.
 
 ***FILE SIZES MUST BE A MINIMUM OF 2 SECONDS. ALL INPUT DATA WILL BE TRUNCATED FROM THE BEGINNING TO 2 SECONDS***
