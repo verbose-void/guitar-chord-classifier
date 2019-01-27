@@ -41,7 +41,7 @@ def get_chord_data_paths(parent_path=DATA_DIR_PATH):
                         if file_path == '.DS_Store' and not os.path.isdir(file_path):
                             continue
                         file_path = jp(chord_and_quality_type_dir, file_path)
-                        paths.append((chord_name, quality_type, file_path))
+                        paths.append([chord_name, quality_type, file_path])
 
     return paths
 
