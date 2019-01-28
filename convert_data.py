@@ -42,8 +42,14 @@ def get_chord_data_paths(parent_path=DATA_DIR_PATH):
                             continue
                         file_path = jp(chord_and_quality_type_dir, file_path)
                         paths.append([chord_name, quality_type, file_path])
+        elif chord_name == 'not_a_chord':
+            for file_path in os.listdir(chord_path):
+                if file_path == '.DS_Store' and not os.path.isdir(file_path):
+                    continue
+                file_path = jp(chord_and_quality_type_dir, file_path)
+                paths.append([chord_name, 'none', file_path])
 
-    return paths
+    return np.array(paths)
 
 
 def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGRAM_DATA_DIR_PATH, length_in_seconds: int = AUDIO_LENGTH, plot_image_count: int = 0):
@@ -98,4 +104,4 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
 
 
 if __name__ == '__main__':
-    spectrogramify(input_path=RAW_DATA_DIR_PATH, plot_image_count=2)
+    spectrogramify(input_path=RAW_DATA_DIR_PATH, plot_image_count=5)
