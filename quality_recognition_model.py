@@ -23,11 +23,11 @@ def get_learner(bs=5):
 
     print('Data loaded, available classes: ', data.classes)
 
-    learn = create_cnn(data, models.resnet34, metrics=error_rate)
+    learn = create_cnn(data, models.resnet34, metrics=(error_rate, accuracy))
 
     # load if model exists
-    if os.path.isfile(SPECTROGRAM_DATA_DIR_PATH + '/models/%s.pth' % MODEL_NAME):
-        learn.load(MODEL_NAME)
+    # if os.path.isfile(SPECTROGRAM_DATA_DIR_PATH + '/models/%s.pth' % MODEL_NAME):
+    #     learn.load(MODEL_NAME)
 
     return learn
 
@@ -39,4 +39,4 @@ if __name__ == '__main__':
     interp = ClassificationInterpretation.from_learner(learn)
     print(interp.most_confused())
 
-    atexit.register(lambda: learn.save(MODEL_NAME))
+    # atexit.register(lambda: learn.save(MODEL_NAME))
