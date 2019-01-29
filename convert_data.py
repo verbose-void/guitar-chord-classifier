@@ -63,7 +63,7 @@ def split_silence(input_path: str = RAW_CONTINUOUS_DIR_PATH, output_dir: str = C
         print('Chunked: %i/%i\n' % (used, len(chunks)))
 
 
-def get_chord_data_paths(parent_path=DATA_DIR_PATH):
+def get_chord_data_paths(parent_path=DATA_DIR_PATH, exempt_qualities=[], exempt_chords=[]):
     """
     Args:
         parent_path (str): the parent path for the data subdirectories.
@@ -83,10 +83,16 @@ def get_chord_data_paths(parent_path=DATA_DIR_PATH):
     jp = os.path.join
     # Loop through each chord type folder
     for chord_name in os.listdir(parent_path):
+        if chord_name in exempt_chords:
+            continue
+
         chord_path = jp(parent_path, chord_name)
         if os.path.isdir(chord_path):
             # Loop through each quality type folder
             for quality_type in os.listdir(chord_path):
+                if quality_type in exempt_qualities:
+                    continue
+
                 chord_and_quality_type_dir = jp(chord_path, quality_type)
                 if os.path.isdir(chord_and_quality_type_dir):
                     for file_path in os.listdir(chord_and_quality_type_dir):
