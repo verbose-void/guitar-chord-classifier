@@ -104,7 +104,7 @@ def get_chord_data_paths(parent_path=DATA_DIR_PATH):
     return np.array(paths)
 
 
-def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGRAM_DATA_DIR_PATH, length_in_seconds: int = AUDIO_LENGTH, plot_image_count: int = 0):
+def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGRAM_DATA_DIR_PATH, length_in_seconds: int = AUDIO_LENGTH, plot_image_count: int = 0, remove_silence=True):
     """
     Takes all the data from 'input_path' & converts it to a spectrogram image, dumping it to 'output_path'.
 
@@ -114,6 +114,7 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
         plot_image_count (int): Determines how many spec images will be plotted while saving.
     """
 
+    len_milis = length_in_seconds * 1000
     paths = get_chord_data_paths(input_path)
     plotted = 0
 
@@ -127,10 +128,17 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
         os.makedirs(path_to_file, exist_ok=True)
 
         sound = AudioSegment.from_file(path)
-        # remove silence
-        sound = silence.split_on_silence(
-            sound, min_silence_len=MIN_SILENCE_LEN, silence_thresh=SILENCE_THRESH)[0]
-        sound = sound[:int(length_in_seconds * 1000)]  # trim to length
+
+        if remove_silence:
+            sound = silence.split_on_silence(
+                sound, min_silence_len=MIN_SILENCE_LEN, silence_thresh=SILENCE_THRESH)[0]
+
+        if len(sound) < len_milis:
+            print('\nClip too short.. (silence removal?: %b) min length: %.1fs: %s\n' %
+                  (remove_silence, length_in_seconds, path))
+            continue
+
+        sound = sound[:int(len_milis)]  # trim to length
         sound = sound.set_channels(1)  # convert to single channel
 
         # get array & convert to freq, times, & amplitudes
@@ -162,6 +170,6 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
 
 
 if __name__ == '__main__':
-    split_silence()
-    spectrogramify(input_path=RAW_DATA_DIR_PATH, plot_image_count=0)
-    spectrogramify(input_path=CONTINUOUS_DIR_PATH, plot_image_count=0)
+    # split_silence()
+    spectrogramify(input_path=RAW_DATA_DIR_PATH)
+    spectrogramify(input_path=CONTINUOUS_DIR_PATH, remove_silence=False)
