@@ -1,7 +1,11 @@
 .DS_Store
 .vscode
-chord_data
-raw_data
-spec_data
+
 tempCodeRunnerFile.py
 __pycache__
+
+# Data files
+continuous_raw
+continuous_split
+raw_data
+spec_data
