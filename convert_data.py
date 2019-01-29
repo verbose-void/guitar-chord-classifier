@@ -2,13 +2,65 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
-from pydub import AudioSegment
+from pydub import AudioSegment, silence
 import scipy.signal as signal
 
-AUDIO_LENGTH = 2  # seconds
+AUDIO_LENGTH = 1.2  # seconds
 SPECTROGRAM_DATA_DIR_PATH = 'spec_data'
 DATA_DIR_PATH = 'chord_data'
 RAW_DATA_DIR_PATH = 'raw_data'
+RAW_CONTINUOUS_DIR_PATH = 'continuous_raw'
+CONTINUOUS_DIR_PATH = 'continuous_split'
+
+EXEMPT_FILES = ['.DS_Store']
+
+MIN_SILENCE_LEN = 1000
+SILENCE_THRESH = -38
+
+
+def split_silence(input_path: str = RAW_CONTINUOUS_DIR_PATH, output_dir: str = CONTINUOUS_DIR_PATH):
+    """
+    Takes all audio/video clips contained in 'input_path' & splits the clips into the loud spikes.
+    This effectively converts the clip into many subclips of potential chord strums.
+
+    If a file is contained in a sub-directory of 'input_path', it will be put into a respectively named file in the 'output_dir'.
+
+    Arguments:
+        input_path (str): The folder containing the audio slice(s).
+        output_dir (str): The folder where the clips will be saved to.
+    """
+
+    if os.path.isdir(input_path):
+        for fname in os.listdir(input_path):
+            f_out_dir = output_dir
+
+            if os.path.isdir(input_path + '/' + fname):
+                f_out_dir += '/' + fname
+
+            split_silence(input_path + '/' + fname,
+                          f_out_dir)
+        return
+
+    if os.path.split(input_path)[1] not in EXEMPT_FILES:
+        print('Splitting ' + input_path)
+        sound = AudioSegment.from_file(input_path)
+        chunks = silence.split_on_silence(
+            sound, min_silence_len=MIN_SILENCE_LEN, silence_thresh=SILENCE_THRESH)
+
+        os.makedirs(output_dir, exist_ok=True)
+
+        used = 0
+
+        for i, chunk in enumerate(chunks):
+            # Too short
+            if len(chunk) < AUDIO_LENGTH * 1000:
+                continue
+
+            name = os.path.splitext(input_path)[0].split('/')[-1]
+            chunk.export(output_dir + '/' + name + '%i.wav' % i)
+            used += 1
+
+        print('Chunked: %i/%i\n' % (used, len(chunks)))
 
 
 def get_chord_data_paths(parent_path=DATA_DIR_PATH):
@@ -38,13 +90,13 @@ def get_chord_data_paths(parent_path=DATA_DIR_PATH):
                 chord_and_quality_type_dir = jp(chord_path, quality_type)
                 if os.path.isdir(chord_and_quality_type_dir):
                     for file_path in os.listdir(chord_and_quality_type_dir):
-                        if file_path == '.DS_Store' and not os.path.isdir(file_path):
+                        if file_path in EXEMPT_FILES and not os.path.isdir(file_path):
                             continue
                         file_path = jp(chord_and_quality_type_dir, file_path)
                         paths.append([chord_name, quality_type, file_path])
         elif chord_name == 'not_a_chord':
             for file_path in os.listdir(chord_path):
-                if file_path == '.DS_Store' and not os.path.isdir(file_path):
+                if file_path in EXEMPT_FILES and not os.path.isdir(file_path):
                     continue
                 file_path = jp(chord_and_quality_type_dir, file_path)
                 paths.append([chord_name, 'none', file_path])
@@ -62,7 +114,7 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
         plot_image_count (int): Determines how many spec images will be plotted while saving.
     """
 
-    paths = get_chord_data_paths(RAW_DATA_DIR_PATH)
+    paths = get_chord_data_paths(input_path)
     plotted = 0
 
     for chord_name, quality, path in paths:
@@ -75,7 +127,10 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
         os.makedirs(path_to_file, exist_ok=True)
 
         sound = AudioSegment.from_file(path)
-        sound = sound[:length_in_seconds * 1000]  # trim to length
+        # remove silence
+        sound = silence.split_on_silence(
+            sound, min_silence_len=MIN_SILENCE_LEN, silence_thresh=SILENCE_THRESH)[0]
+        sound = sound[:int(length_in_seconds * 1000)]  # trim to length
         sound = sound.set_channels(1)  # convert to single channel
 
         # get array & convert to freq, times, & amplitudes
@@ -92,16 +147,21 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
         ax = plt.gca()
         ax.xaxis.set_major_locator(matplotlib.ticker.NullLocator())
         ax.yaxis.set_major_locator(matplotlib.ticker.NullLocator())
-        plt.savefig(
-            path_to_file + '/%s.png' % file_name,
-            pad_inches=0, bbox_inches='tight', transparent=True
-        )
+
+        save_to = path_to_file + '/%s.png' % file_name
+
+        plt.savefig(save_to, pad_inches=0,
+                    bbox_inches='tight', transparent=True)
 
         if plotted < plot_image_count:
-            print('plotting a %s %s' % (quality, chord_name))
             plt.show()
             plotted += 1
 
+        print('Spectrogrammed: (%s, %s) -- from %s' %
+              (quality, chord_name, path))
+
 
 if __name__ == '__main__':
-    spectrogramify(input_path=RAW_DATA_DIR_PATH, plot_image_count=5)
+    split_silence()
+    spectrogramify(input_path=RAW_DATA_DIR_PATH, plot_image_count=0)
+    spectrogramify(input_path=CONTINUOUS_DIR_PATH, plot_image_count=0)
