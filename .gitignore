@@ -9,3 +9,5 @@ continuous_raw
 continuous_split
 raw_data
 spec_data
+already_processed
+cp_spec_data
