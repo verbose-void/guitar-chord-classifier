@@ -8,10 +8,13 @@ import atexit
 MODEL_NAME = 'model-1'
 
 
-def get_learner(bs=5):
+def get_learner(bs=5, seed=None):
     """
     Returns the quality recognition model
     """
+
+    if seed is not None:
+        np.random.seed(seed)
 
     # Load data
     data = get_chord_data_paths(parent_path=SPECTROGRAM_DATA_DIR_PATH)
