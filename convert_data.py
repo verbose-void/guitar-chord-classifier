@@ -14,7 +14,7 @@ CONTINUOUS_DIR_PATH = 'continuous_split'
 
 EXEMPT_FILES = ['.DS_Store']
 
-MIN_SILENCE_LEN = 1000
+MIN_SILENCE_LEN = 250
 SILENCE_THRESH = -38
 
 
@@ -140,7 +140,7 @@ def spectrogramify(input_path: str = DATA_DIR_PATH, output_path: str = SPECTROGR
                 sound, min_silence_len=MIN_SILENCE_LEN, silence_thresh=SILENCE_THRESH)[0]
 
         if len(sound) < len_milis:
-            print('\nClip too short.. (silence removal?: %b) min length: %.1fs: %s\n' %
+            print('\nClip too short.. (silence removal?: %r) min length: %.1fs: %s\n' %
                   (remove_silence, length_in_seconds, path))
             continue
 
