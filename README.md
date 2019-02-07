@@ -1,6 +1,8 @@
 # Guitar_Chord_Classifier
 A machine learning model that classifies what guitar chord is being played and the quality of it: i.e if it's ringy, clear, or muted.
 
+**Data not included**
+
 ### Versions:
 - Built in [python3](https://www.python.org/downloads/).
 
